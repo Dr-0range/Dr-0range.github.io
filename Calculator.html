@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTRPG Skill Check Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .stat-input::-webkit-outer-spin-button,
+        .stat-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .stat-input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Style for the disabled button during roll */
+        #roll-check:disabled {
+            background-color: #a0a0a0;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left Column: Character Management -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Character Creator -->
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 text-cyan-400 flex items-center"><i class="fas fa-user-plus mr-3"></i>Create Character</h2>
+                <div class="space-y-4">
+                    <input type="text" id="char-name" placeholder="Character Name" class="w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="char-int" class="block text-sm font-medium text-slate-400">INT</label>
+                            <input type="number" id="char-int" min="1" max="5" value="1" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        </div>
+                        <div>
+                            <label for="char-psy" class="block text-sm font-medium text-slate-400">PSY</label>
+                            <input type="number" id="char-psy" min="1" max="5" value="1" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        </div>
+                        <div>
+                            <label for="char-phy" class="block text-sm font-medium text-slate-400">PHY</label>
+                            <input type="number" id="char-phy" min="1" max="5" value="1" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        </div>
+                        <div>
+                            <label for="char-mot" class="block text-sm font-medium text-slate-400">MOT</label>
+                            <input type="number" id="char-mot" min="1" max="5" value="1" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        </div>
+                    </div>
+                    <button id="save-char" class="w-full bg-cyan-600 text-white font-bold py-3 rounded-lg hover:bg-cyan-700 transition-colors flex items-center justify-center">
+                        Save Character
+                    </button>
+                </div>
+            </div>
+             <!-- Saved Characters -->
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 text-cyan-400 flex items-center"><i class="fas fa-users mr-3"></i>Saved Characters</h2>
+                <div id="char-list" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    <!-- Character items will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Skill Check and Results -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-slate-800 p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 text-amber-400 flex items-center"><i class="fas fa-dice-d20 mr-3"></i>Perform Skill Check</h2>
+                <div id="skill-check-area" class="space-y-4">
+                     <p id="no-char-selected" class="text-center text-slate-400 py-8">Select a character to begin.</p>
+                     <div id="skill-check-ui" class="hidden">
+                        <p class="text-center text-lg mb-4">Performing check for: <span id="active-char-name" class="font-bold text-cyan-400"></span></p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <select id="skill-select" class="w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="INT">INT (Intellect)</option>
+                                <option value="PSY">PSY (Psyche)</option>
+                                <option value="PHY">PHY (Physique)</option>
+                                <option value="MOT">MOT (Motorics)</option>
+                            </select>
+                            <select id="difficulty-select" class="w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="6">Trivial (6)</option>
+                                <option value="10">Easy (10)</option>
+                                <option value="12" selected>Medium (12)</option>
+                                <option value="16">Hard (16)</option>
+                                <option value="18">Impossible (18)</option>
+                            </select>
+                        </div>
+                         <button id="roll-check" class="w-full mt-4 bg-amber-600 text-white font-bold py-3 rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center text-lg disabled:bg-slate-500 disabled:cursor-not-allowed">
+                            <i class="fas fa-dice-d6 mr-2"></i> Roll Check (2d6)
+                        </button>
+                    </div>
+                </div>
+            </div>
+             <!-- Result Area -->
+            <div id="result-container" class="bg-slate-800 p-6 rounded-xl shadow-lg hidden border-2 border-transparent transition-colors duration-300">
+                 <h2 class="text-2xl font-bold mb-4 flex items-center transition-colors duration-300"><i class="fas fa-scroll mr-3"></i>Outcome</h2>
+                 <div id="result-breakdown" class="bg-slate-700 p-4 rounded-lg text-center mb-4 space-y-2">
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- DATA AND STATE ---
+        let characters = [];
+        let activeCharacter = null;
+        const diceIcons = {
+            1: 'fa-dice-one',
+            2: 'fa-dice-two',
+            3: 'fa-dice-three',
+            4: 'fa-dice-four',
+            5: 'fa-dice-five',
+            6: 'fa-dice-six'
+        };
+
+        // --- DOM ELEMENTS ---
+        const charNameInput = document.getElementById('char-name');
+        const statInputs = {
+            INT: document.getElementById('char-int'),
+            PSY: document.getElementById('char-psy'),
+            PHY: document.getElementById('char-phy'),
+            MOT: document.getElementById('char-mot'),
+        };
+        const saveCharBtn = document.getElementById('save-char');
+        const charListDiv = document.getElementById('char-list');
+        const noCharSelectedMsg = document.getElementById('no-char-selected');
+        const skillCheckUIDiv = document.getElementById('skill-check-ui');
+        const activeCharNameSpan = document.getElementById('active-char-name');
+        const skillSelect = document.getElementById('skill-select');
+        const difficultySelect = document.getElementById('difficulty-select');
+        const rollCheckBtn = document.getElementById('roll-check');
+        const resultContainer = document.getElementById('result-container');
+        const resultBreakdownDiv = document.getElementById('result-breakdown');
+
+        // --- CHARACTER MANAGEMENT ---
+        function saveCharacters() {
+            localStorage.setItem('ttrpg_characters', JSON.stringify(characters));
+        }
+
+        function loadCharacters() {
+            const storedChars = localStorage.getItem('ttrpg_characters');
+            if (storedChars) {
+                characters = JSON.parse(storedChars);
+                renderCharacterList();
+            }
+        }
+
+        function renderCharacterList() {
+            charListDiv.innerHTML = '';
+            if (characters.length === 0) {
+                 charListDiv.innerHTML = '<p class="text-slate-500 text-center">No characters saved yet.</p>';
+                 return;
+            }
+            characters.forEach((char, index) => {
+                const charDiv = document.createElement('div');
+                charDiv.className = `p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors ${activeCharacter?.id === char.id ? 'bg-cyan-500/30 ring-2 ring-cyan-500' : 'bg-slate-700 hover:bg-slate-600'}`;
+                charDiv.innerHTML = `
+                    <div>
+                        <p class="font-bold">${char.name}</p>
+                        <p class="text-xs text-slate-400">INT:${char.stats.INT} PSY:${char.stats.PSY} PHY:${char.stats.PHY} MOT:${char.stats.MOT}</p>
+                    </div>
+                    <button data-index="${index}" class="delete-btn text-slate-500 hover:text-red-500 transition-colors">&times;</button>
+                `;
+                charDiv.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('delete-btn')) {
+                         e.stopPropagation();
+                         deleteCharacter(parseInt(e.target.dataset.index));
+                    } else {
+                         selectCharacter(char.id);
+                    }
+                });
+                charListDiv.appendChild(charDiv);
+            });
+        }
+        
+        function deleteCharacter(index) {
+            const charToDelete = characters[index];
+            if (activeCharacter?.id === charToDelete.id) {
+                activeCharacter = null;
+                skillCheckUIDiv.classList.add('hidden');
+                noCharSelectedMsg.classList.remove('hidden');
+                resultContainer.classList.add('hidden');
+            }
+            characters.splice(index, 1);
+            saveCharacters();
+            renderCharacterList();
+        }
+
+        function selectCharacter(charId) {
+            activeCharacter = characters.find(c => c.id === charId);
+            if (activeCharacter) {
+                activeCharNameSpan.textContent = activeCharacter.name;
+                skillCheckUIDiv.classList.remove('hidden');
+                noCharSelectedMsg.classList.add('hidden');
+            }
+            renderCharacterList(); // Re-render to show selection
+        }
+
+        saveCharBtn.addEventListener('click', () => {
+            const name = charNameInput.value.trim();
+            if (!name) {
+                alert("Please enter a character name.");
+                return;
+            }
+            const newChar = {
+                id: Date.now(),
+                name: name,
+                stats: {
+                    INT: parseInt(statInputs.INT.value),
+                    PSY: parseInt(statInputs.PSY.value),
+                    PHY: parseInt(statInputs.PHY.value),
+                    MOT: parseInt(statInputs.MOT.value),
+                }
+            };
+            characters.push(newChar);
+            saveCharacters();
+            renderCharacterList();
+            charNameInput.value = ''; // Reset name input
+        });
+
+        // --- SKILL CHECK LOGIC with ANIMATION ---
+        rollCheckBtn.addEventListener('click', () => {
+            if (!activeCharacter || rollCheckBtn.disabled) return;
+
+            // 1. Setup UI for rolling animation
+            rollCheckBtn.disabled = true;
+            rollCheckBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Rolling...';
+            resultContainer.classList.remove('hidden');
+
+            // 2. Start animation interval
+            const animationInterval = setInterval(() => {
+                const tempDie1 = Math.floor(Math.random() * 6) + 1;
+                const tempDie2 = Math.floor(Math.random() * 6) + 1;
+                displayResult(null, null, null, null, null, 'Rolling...', tempDie1, tempDie2, true);
+            }, 100);
+
+            // 3. Set timeout to end animation and show the final result
+            setTimeout(() => {
+                clearInterval(animationInterval); // Stop the animation
+
+                // --- Calculate Final Result ---
+                const skill = skillSelect.value;
+                const threshold = parseInt(difficultySelect.value);
+                const statValue = activeCharacter.stats[skill];
+                const target = threshold - (statValue * 2);
+
+                const die1 = Math.floor(Math.random() * 6) + 1;
+                const die2 = Math.floor(Math.random() * 6) + 1;
+                const roll = die1 + die2;
+
+                const diff = roll - target;
+                let outcome, outcomeText;
+
+                if (roll === 2) {
+                    outcome = "Critical Failure";
+                    outcomeText = "Critical Failure!";
+                } else if (roll === 12) {
+                    outcome = "Critical Success";
+                    outcomeText = "Critical Success!";
+                } else if (roll >= target) {
+                    if (diff <= 1) outcome = "Bare Success";
+                    else if (diff <= 4) outcome = "Solid Success";
+                    else outcome = "Decisive Success";
+                    outcomeText = `${outcome}!`;
+                } else {
+                    if (diff >= -2) outcome = "Narrow Failure";
+                    else if (diff >= -5) outcome = "Clear Failure";
+                    else outcome = "Complete Failure";
+                    outcomeText = `${outcome}!`;
+                }
+
+                // --- Display Final Result ---
+                displayResult(skill, statValue, threshold, target, roll, outcomeText, die1, die2, false);
+
+                // --- Reset Button ---
+                rollCheckBtn.disabled = false;
+                rollCheckBtn.innerHTML = '<i class="fas fa-dice-d6 mr-2"></i> Roll Check (2d6)';
+
+            }, 2000); // 2-second animation duration
+        });
+        
+        function displayResult(skill, statValue, threshold, target, roll, outcomeText, die1, die2, isAnimating = false) {
+            resultContainer.classList.remove('hidden');
+            const resultHeader = resultContainer.querySelector('h2');
+            
+            // Reset all dynamic colors first
+            resultContainer.classList.remove('bg-lime-900/40', 'bg-red-900/40', 'border-lime-700', 'border-red-700', 'border-amber-600');
+            resultHeader.classList.remove('text-lime-400', 'text-red-400', 'text-amber-400');
+
+            if (isAnimating) {
+                // --- ANIMATION STYLING ---
+                resultHeader.classList.add('text-amber-400');
+                resultContainer.classList.add('border-amber-600');
+                
+                const die1Icon = `<i class="fas ${diceIcons[die1]} text-4xl text-amber-300"></i>`;
+                const die2Icon = `<i class="fas ${diceIcons[die2]} text-4xl text-amber-300"></i>`;
+                const currentRoll = die1 + die2;
+                resultBreakdownDiv.innerHTML = `
+                    <p class="text-lg text-slate-400">&nbsp;</p>
+                    <div class="flex items-center justify-center space-x-4 my-3">
+                        ${die1Icon}
+                        <span class="text-4xl font-bold text-slate-400">+</span>
+                        ${die2Icon}
+                        <span class="text-4xl font-bold text-slate-400">=</span>
+                        <span class="text-5xl font-bold text-amber-400">${currentRoll}</span>
+                    </div>
+                    <p class="text-2xl font-bold text-slate-400">Rolling...</p>
+                `;
+            } else {
+                // --- FINAL RESULT STYLING ---
+                const isSuccess = outcomeText.includes("Success");
+                const finalTextColor = isSuccess ? 'text-lime-400' : 'text-red-400';
+                const finalBgColor = isSuccess ? 'bg-lime-900/40' : 'bg-red-900/40';
+                const finalBorderColor = isSuccess ? 'border-lime-700' : 'border-red-700';
+                
+                // Apply final colors
+                resultHeader.classList.add(finalTextColor);
+                resultContainer.classList.add(finalBgColor, finalBorderColor);
+
+                const die1Icon = `<i class="fas ${diceIcons[die1]} text-4xl ${finalTextColor}"></i>`;
+                const die2Icon = `<i class="fas ${diceIcons[die2]} text-4xl ${finalTextColor}"></i>`;
+
+                resultBreakdownDiv.innerHTML = `
+                    <p class="text-lg">Target: ${target} (Threshold ${threshold} - Stat ${statValue}*2)</p>
+                    <div class="flex items-center justify-center space-x-4 my-3">
+                        ${die1Icon}
+                        <span class="text-4xl font-bold text-slate-400">+</span>
+                        ${die2Icon}
+                        <span class="text-4xl font-bold text-slate-400">=</span>
+                        <span class="text-5xl font-bold ${finalTextColor}">${roll}</span>
+                    </div>
+                    <p class="text-2xl font-bold ${finalTextColor}">${outcomeText}</p>
+                `;
+            }
+        }
+        
+        // --- INITIALIZE APP ---
+        window.addEventListener('DOMContentLoaded', loadCharacters);
+    </script>
+</body>
+</html>
