@@ -24,6 +24,54 @@
             background-color: #a0a0a0;
             cursor: not-allowed;
         }
+        /* Custom stat colors */
+        .stat-int { color: #4aa9b9; }
+        .stat-psy { color: #6448b1; }
+        .stat-phy { color: #b03a5c; }
+        .stat-mot { color: #c49f2f; }
+        
+        /* Custom slider styles */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #334155; /* slate-700 */
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #f59e0b; /* amber-500 */
+            cursor: pointer;
+            margin-top: -6px; /* Center the thumb on the track */
+        }
+        input[type=range]:focus::-webkit-slider-runnable-track {
+            background: #475569; /* slate-600 */
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 5px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #f59e0b;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white flex items-center justify-center min-h-screen p-4">
@@ -39,19 +87,19 @@
                         <input type="text" id="char-name" placeholder="Character Name" class="w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label for="char-int" class="block text-sm font-medium text-slate-400">INT</label>
+                                <label for="char-int" class="block text-sm font-bold stat-int">INT</label>
                                 <input type="number" id="char-int" min="1" max="5" value="1" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                             </div>
                             <div>
-                                <label for="char-psy" class="block text-sm font-medium text-slate-400">PSY</label>
+                                <label for="char-psy" class="block text-sm font-bold stat-psy">PSY</label>
                                 <input type="number" id="char-psy" min="1" max="5" value="1" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                             </div>
                             <div>
-                                <label for="char-phy" class="block text-sm font-medium text-slate-400">PHY</label>
+                                <label for="char-phy" class="block text-sm font-bold stat-phy">PHY</label>
                                 <input type="number" id="char-phy" min="1" max="5" value="1" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                             </div>
                             <div>
-                                <label for="char-mot" class="block text-sm font-medium text-slate-400">MOT</label>
+                                <label for="char-mot" class="block text-sm font-bold stat-mot">MOT</label>
                                 <input type="number" id="char-mot" min="1" max="5" value="1" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                             </div>
                         </div>
@@ -80,10 +128,10 @@
                             <p class="text-center text-lg">Performing check for: <span id="active-char-name" class="font-bold text-cyan-400"></span></p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <select id="skill-select" class="w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                    <option value="INT">INT (Intellect)</option>
-                                    <option value="PSY">PSY (Psyche)</option>
-                                    <option value="PHY">PHY (Physique)</option>
-                                    <option value="MOT">MOT (Motorics)</option>
+                                    <option value="INT" style="color: #4aa9b9;">INT (Intellect)</option>
+                                    <option value="PSY" style="color: #6448b1;">PSY (Psyche)</option>
+                                    <option value="PHY" style="color: #b03a5c;">PHY (Physique)</option>
+                                    <option value="MOT" style="color: #c49f2f;">MOT (Motorics)</option>
                                 </select>
                                 <select id="difficulty-select" class="w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500">
                                     <option value="6">Trivial (6)</option>
@@ -93,9 +141,12 @@
                                     <option value="18">Impossible (18)</option>
                                 </select>
                             </div>
-                            <div>
-                                <label for="skill-modifier" class="block text-sm font-medium text-slate-400 mb-1">Modifier (+/-)</label>
-                                <input type="number" id="skill-modifier" value="0" class="stat-input w-full bg-slate-700 p-3 rounded-md border border-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <div class="flex flex-col">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label for="skill-modifier-slider" class="block text-sm font-medium text-slate-400">Modifier</label>
+                                    <span id="skill-modifier-value" class="font-bold text-lg text-amber-400">+0</span>
+                                </div>
+                                <input type="range" id="skill-modifier-slider" min="-5" max="5" value="0" class="w-full h-2 rounded-lg appearance-none cursor-pointer">
                             </div>
                              <button id="roll-check" class="w-full bg-amber-600 text-white font-bold py-3 rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center text-lg disabled:bg-slate-500 disabled:cursor-not-allowed">
                                 <i class="fas fa-dice-d6 mr-2"></i> Roll Check (2d6)
@@ -106,7 +157,7 @@
                  <!-- Result Area -->
                 <div id="result-container" class="bg-slate-800 p-6 rounded-xl shadow-lg border-2 border-slate-700 transition-colors duration-300">
                      <h2 class="text-2xl font-bold mb-4 flex items-center transition-colors duration-300 text-slate-400"><i class="fas fa-scroll mr-3"></i>Outcome</h2>
-                     <div id="result-breakdown" class="bg-slate-700 p-4 rounded-lg text-center mb-4 space-y-2 min-h-[160px] flex items-center justify-center">
+                     <div id="result-breakdown" class="bg-slate-700 p-4 rounded-lg text-center mb-4 space-y-2 min-h-[160px] flex flex-col justify-center">
                      </div>
                 </div>
                  <!-- History Area -->
@@ -133,6 +184,12 @@
             5: 'fa-dice-five',
             6: 'fa-dice-six'
         };
+        const statColorMap = { 
+            INT: 'stat-int', 
+            PSY: 'stat-psy', 
+            PHY: 'stat-phy', 
+            MOT: 'stat-mot' 
+        };
 
         // --- DOM ELEMENTS ---
         const charNameInput = document.getElementById('char-name');
@@ -149,7 +206,8 @@
         const activeCharNameSpan = document.getElementById('active-char-name');
         const skillSelect = document.getElementById('skill-select');
         const difficultySelect = document.getElementById('difficulty-select');
-        const skillModifierInput = document.getElementById('skill-modifier');
+        const skillModifierSlider = document.getElementById('skill-modifier-slider');
+        const skillModifierValue = document.getElementById('skill-modifier-value');
         const rollCheckBtn = document.getElementById('roll-check');
         const resultContainer = document.getElementById('result-container');
         const resultBreakdownDiv = document.getElementById('result-breakdown');
@@ -189,12 +247,16 @@
             }
             characters.forEach((char, index) => {
                 const charDiv = document.createElement('div');
-                // Removed mx-1 and am letting the parent's padding handle spacing
                 charDiv.className = `p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors ${activeCharacter?.id === char.id ? 'bg-cyan-500/30 ring-2 ring-cyan-500' : 'bg-slate-700 hover:bg-slate-600'}`;
                 charDiv.innerHTML = `
                     <div>
                         <p class="font-bold">${char.name}</p>
-                        <p class="text-xs text-slate-400">INT:${char.stats.INT} PSY:${char.stats.PSY} PHY:${char.stats.PHY} MOT:${char.stats.MOT}</p>
+                        <p class="text-xs text-slate-400 space-x-2">
+                            <span class="font-bold stat-int">INT</span><span>:${char.stats.INT}</span>
+                            <span class="font-bold stat-psy">PSY</span><span>:${char.stats.PSY}</span>
+                            <span class="font-bold stat-phy">PHY</span><span>:${char.stats.PHY}</span>
+                            <span class="font-bold stat-mot">MOT</span><span>:${char.stats.MOT}</span>
+                        </p>
                     </div>
                     <button data-index="${index}" class="delete-btn text-slate-500 hover:text-red-500 transition-colors">&times;</button>
                 `;
@@ -223,7 +285,7 @@
 
                 const p = document.createElement('p');
                 p.className = 'text-sm text-slate-300 bg-slate-700/50 p-2 rounded-md flex items-center';
-                p.innerHTML = `<span class="text-xs text-slate-500 mr-2">[${entry.date}]</span> <div><span class="font-bold">${entry.charName}</span> ${outcomeWord} a <span class="font-semibold">${entry.skill}</span> check of <span class="font-semibold">${entry.difficulty}</span> difficulty with a <span class="font-bold ${color}">${entry.roll}</span>.</div>`;
+                p.innerHTML = `<span class="text-xs text-slate-500 mr-2">[${entry.date}]</span> <div><span class="font-bold">${entry.charName}</span> ${outcomeWord} a <span class="font-bold ${statColorMap[entry.skill]}">${entry.skill}</span> check of <span class="font-semibold">${entry.difficulty}</span> difficulty with a <span class="font-bold ${color}">${entry.roll}</span>.</div>`;
                 historyListDiv.appendChild(p);
             });
         }
@@ -254,7 +316,8 @@
             activeCharacter = characters.find(c => c.id === charId);
             if (activeCharacter) {
                 activeCharNameSpan.textContent = activeCharacter.name;
-                skillModifierInput.value = 0;
+                skillModifierSlider.value = 0;
+                skillModifierValue.textContent = "+0";
                 skillCheckUIDiv.classList.remove('hidden');
                 noCharSelectedMsg.classList.add('hidden');
             }
@@ -284,6 +347,11 @@
         });
 
         // --- SKILL CHECK LOGIC with ANIMATION ---
+        skillModifierSlider.addEventListener('input', () => {
+            const value = parseInt(skillModifierSlider.value);
+            skillModifierValue.textContent = value >= 0 ? `+${value}` : value;
+        });
+
         rollCheckBtn.addEventListener('click', () => {
             if (!activeCharacter || rollCheckBtn.disabled) return;
 
@@ -303,7 +371,7 @@
                 const difficultyText = difficultySelect.options[difficultySelect.selectedIndex].text;
                 const threshold = parseInt(difficultySelect.value);
                 const statValue = activeCharacter.stats[skill];
-                const modifier = parseInt(skillModifierInput.value) || 0;
+                const modifier = parseInt(skillModifierSlider.value) || 0;
                 const target = threshold - ((statValue + modifier) * 2);
 
                 const die1 = Math.floor(Math.random() * 6) + 1;
@@ -368,7 +436,7 @@
                 const die2Icon = `<i class="fas ${diceIcons[die2]} text-4xl text-amber-300"></i>`;
                 const currentRoll = die1 + die2;
                 resultBreakdownDiv.innerHTML = `
-                    <p class="text-lg text-slate-400">&nbsp;</p>
+                    <p class="text-2xl font-bold text-slate-400">Rolling...</p>
                     <div class="flex items-center justify-center space-x-4 my-3">
                         ${die1Icon}
                         <span class="text-4xl font-bold text-slate-400">+</span>
@@ -376,7 +444,7 @@
                         <span class="text-4xl font-bold text-slate-400">=</span>
                         <span class="text-5xl font-bold text-amber-400">${currentRoll}</span>
                     </div>
-                    <p class="text-2xl font-bold text-slate-400">Rolling...</p>
+                    <p class="text-lg text-slate-400">&nbsp;</p>
                 `;
             } else {
                 const isSuccess = outcomeText.includes("Success");
@@ -392,7 +460,7 @@
                 const modifierText = modifier !== 0 ? (modifier > 0 ? ` + ${modifier}` : ` - ${Math.abs(modifier)}`) : '';
 
                 resultBreakdownDiv.innerHTML = `
-                    <p class="text-lg">Target: ${target} (Threshold ${threshold} - (Stat ${statValue}${modifierText}) * 2)</p>
+                    <p class="text-2xl font-bold ${finalTextColor}">${outcomeText}</p>
                     <div class="flex items-center justify-center space-x-4 my-3">
                         ${die1Icon}
                         <span class="text-4xl font-bold text-slate-400">+</span>
@@ -400,7 +468,7 @@
                         <span class="text-4xl font-bold text-slate-400">=</span>
                         <span class="text-5xl font-bold ${finalTextColor}">${roll}</span>
                     </div>
-                    <p class="text-2xl font-bold ${finalTextColor}">${outcomeText}</p>
+                    <p class="text-lg">Target: ${target} (Threshold ${threshold} - (Stat ${statValue}${modifierText}) * 2)</p>
                 `;
             }
         }
